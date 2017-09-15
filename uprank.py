@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common import action_chains, keys
+from pyvirtualdisplay import Display
 import sys
 import time
 import yaml
@@ -12,7 +13,12 @@ import yaml
 config = yaml.safe_load(open("config.yml"))
 url = 'https://www.wg-gesucht.de/'
 edit_url = 'https://www.wg-gesucht.de/gesuch-bearbeiten.html?edit={}'.format(config['application_id'])
-browser = webdriver.Chrome(config['path_to_driver'])
+
+display = Display(visible=0, size=(800, 600))
+display.start()
+
+#browser = webdriver.Chrome(config['path_to_driver'])
+browser = webdriver.Firefox(executable_path=r'/opt/geckodriver')
 delay = 10
 
 def load_web_page():
@@ -92,6 +98,7 @@ def update_application():
 
 def shut_down():
     browser.close()
+    display.stop()
     print("Finished update!")
 
 

@@ -8,9 +8,12 @@ from pyvirtualdisplay import Display
 import sys
 import time
 import yaml
+import os
 
 
-config = yaml.safe_load(open("config.yml"))
+dir = os.path.dirname(__file__)
+config_file_path = os.path.join(dir,"config.yml")
+config = yaml.safe_load(open(config_file_path))
 url = 'https://www.wg-gesucht.de/'
 edit_url = 'https://www.wg-gesucht.de/gesuch-bearbeiten.html?edit={}'.format(config['application_id'])
 

@@ -9,11 +9,14 @@ import sys
 import time
 import yaml
 import os
+import logging
 
 
+# read config file
 dir = os.path.dirname(__file__)
 config_file_path = os.path.join(dir,"config.yml")
 config = yaml.safe_load(open(config_file_path))
+
 url = 'https://www.wg-gesucht.de/'
 edit_url = 'https://www.wg-gesucht.de/gesuch-bearbeiten.html?edit={}'.format(config['application_id'])
 
@@ -24,13 +27,23 @@ display.start()
 browser = webdriver.Chrome(config['path_to_driver'])
 delay = 30
 
+# logging settings
+formatter = logging.Formatter('%(asctime)s - %(message)s')
+fh = logging.FileHandler('output.log')
+fh.setLevel(logging.INFO)
+fh.setFormatter(formatter)
+logger = logging.getLogger('wg-gesucht')
+logger.setLevel(logging.INFO)
+logger.addHandler(fh)
+logger.info('helloooooo')
+
 def load_web_page():
     browser.get(url)
     try:
         WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.XPATH, "//div[@id='service-navigation']/div/a[2]")))
-        print "Page has loaded!"
+        logger.info("Page has loaded!")
     except TimeoutException:
-        print "Loading took more than {} seconds!".format(delay)
+        logger.warn("Loading took more than {} seconds!".format(delay))
         sys.exit(1)
 
 def login():
@@ -39,9 +52,9 @@ def login():
 
     try:
         WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.ID, "login_email_username")))
-        print "Login modal has loaded!"
+        logger.info("Login modal has loaded!")
     except TimeoutException:
-        print "Loading the modal took more than {} seconds!".format(delay)
+        logger.warn("Loading the modal took more than {} seconds!".format(delay))
         sys.exit(1)
 
     # Make sure the login input fields are loaded and visible by simulating a click
@@ -66,7 +79,7 @@ def update_title():
     title2 = u'Studium vorbei - suche WG in der Heimat!'
     try:
         title_element = WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.ID, "title")))
-        print "Title input is ready!"
+        logger.info("Title input is ready!")
         current_title = title_element.get_attribute('value')
         title_element.clear()
         new_title = title1
@@ -74,10 +87,10 @@ def update_title():
             new_title = title2
 
         title_element.send_keys(new_title)
-        print("Set title to {}".format(new_title))
+        logger.info("Set title to {}".format(new_title))
         
     except TimeoutException:
-        print "Loading title input took more than {} seconds!".format(delay)
+        logger.warn("Loading title input took more than {} seconds!".format(delay))
         sys.exit(1)
     
 
@@ -89,11 +102,11 @@ def update_application():
     # Leave and submit first page of application as is
     try:
         first_page = WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.ID, "create_ad")))
-        print "Ad submit button is ready!"
+        logger.info("Ad submit button is ready!")
         first_page.submit()
 
     except TimeoutException:
-        print "Loading ad submit button took more than {} seconds!".format(delay)
+        logger.warn("Loading ad submit button took more than {} seconds!".format(delay))
         sys.exit(1)
 
     # Update title on second page of application
@@ -105,7 +118,7 @@ def update_application():
 def shut_down():
     browser.close()
     display.stop()
-    print("Finished update!")
+    logger.info("Finished update!")
 
 
 if __name__ == '__main__':

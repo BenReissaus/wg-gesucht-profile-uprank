@@ -65,6 +65,7 @@ class Upranking:
             self.logger.info("Page has loaded!")
         except TimeoutException:
             self.logger.warn("Loading took more than {} seconds!".format(self.delay))
+            self.shut_down()
             sys.exit(1)
 
     def login(self):
@@ -76,6 +77,7 @@ class Upranking:
             self.logger.info("Login modal has loaded!")
         except TimeoutException:
             self.logger.warn("Loading the modal took more than {} seconds!".format(self.delay))
+            self.shut_down()
             sys.exit(1)
 
         # Make sure the login input fields are loaded and visible by simulating a click
@@ -112,6 +114,7 @@ class Upranking:
 
         except TimeoutException:
             self.logger.warn("Loading title input took more than {} seconds!".format(self.delay))
+            self.shut_down()
             sys.exit(1)
 
     def update_application(self):
@@ -126,6 +129,7 @@ class Upranking:
 
         except TimeoutException:
             self.logger.warn("Loading ad submit button took more than {} seconds!".format(self.delay))
+            self.shut_down()
             sys.exit(1)
 
         # Update title on second page of application

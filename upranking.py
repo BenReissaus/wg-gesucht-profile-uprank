@@ -37,11 +37,11 @@ class Upranking:
     def initialize(self):
         self.load_config()
 
+        self.display.start()
         self.edit_url = self.edit_url.format(self.config['application_id'])
         self.browser = webdriver.Chrome(self.config['path_to_driver'])
         self.username = self.config['username']
         self.password = self.config['password']
-        self.display.start()
 
         self.initialize_logger()
 

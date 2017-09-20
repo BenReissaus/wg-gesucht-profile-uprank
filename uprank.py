@@ -22,26 +22,26 @@ display = Display(visible=0, size=(800, 600))
 display.start()
 
 browser = webdriver.Chrome(config['path_to_driver'])
-delay = 10
+delay = 30
 
 def load_web_page():
     browser.get(url)
     try:
-        WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.XPATH, "//div[@id='login_register']/a[2]")))
+        WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.XPATH, "//div[@id='service-navigation']/div/a[2]")))
         print "Page has loaded!"
     except TimeoutException:
-        print "Loading took more than 10 seconds!"
+        print "Loading took more than {} seconds!".format(delay)
         sys.exit(1)
 
 def login():
     # Click on Login Link
-    browser.find_element(By.XPATH, "//div[@id='login_register']/a[2]").click()
+    browser.find_element(By.XPATH, "//div[@id='service-navigation']/div/a[2]").click()
 
     try:
         WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.ID, "login_email_username")))
         print "Login modal has loaded!"
     except TimeoutException:
-        print "Loading the modal took more than 10 seconds!"
+        print "Loading the modal took more than {} seconds!".format(delay)
         sys.exit(1)
 
     # Make sure the login input fields are loaded and visible by simulating a click
@@ -77,7 +77,7 @@ def update_title():
         print("Set title to {}".format(new_title))
         
     except TimeoutException:
-        print "Loading title input took more than 10 seconds!"
+        print "Loading title input took more than {} seconds!".format(delay)
         sys.exit(1)
     
 
@@ -93,7 +93,7 @@ def update_application():
         first_page.submit()
 
     except TimeoutException:
-        print "Loading ad submit button took more than 10 seconds!"
+        print "Loading ad submit button took more than {} seconds!".format(delay)
         sys.exit(1)
 
     # Update title on second page of application

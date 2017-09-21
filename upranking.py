@@ -15,6 +15,7 @@ class Upranking:
 
     url = 'https://www.wg-gesucht.de/'
     delay = 30
+    load_tries = 3
     log_file = 'output.log'
 
     def __init__(self):
@@ -58,16 +59,23 @@ class Upranking:
         self.logger.addHandler(fh)
 
     def wait_till_element_loaded(self, element_name, xpath_type, xpath_value):
-        try:
-            condition = EC.presence_of_element_located((xpath_type, xpath_value))
-            element = WebDriverWait(self.browser, self.delay).until(condition)
-            self.logger.info("{} has loaded.".format(element_name))
-        except TimeoutException:
-            self.logger.warn("Loading {} took more than {} seconds!".format(element_name, self.delay))
+
+        tries = 0
+        while (tries < self.load_tries):
+            try:
+                condition = EC.presence_of_element_located((xpath_type, xpath_value))
+                element = WebDriverWait(self.browser, self.delay).until(condition)
+                self.logger.info("'{}' has loaded.".format(element_name))
+            except TimeoutException:
+                self.logger.warn("Loading '{}' took more than {} seconds!".format(element_name, self.delay))
+            else:
+                return element
+            finally:
+                tries += 1
+        else:
+            self.logger.warn("Failed loading '{}' {} times. Exiting.".format(element_name, self.load_tries))
             self.shut_down()
             sys.exit(1)
-        else:
-            return element
 
     def load_web_page(self):
         self.browser.get(self.url)

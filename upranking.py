@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -13,19 +15,22 @@ import logging
 
 class Upranking:
 
-    WG_GESUCHT_URL = 'https://www.wg-gesucht.de/'
-    EDIT_URL = 'https://www.wg-gesucht.de/gesuch-bearbeiten.html?edit={}'
+    WG_GESUCHT_URL = 'https://www.wg-gesucht.de'
+    EDIT_URL = 'https://www.wg-gesucht.de/gesuch-bearbeiten.html?action=update_request&request_id={}'
     LOGIN_BUTTON_XPATH = "//a[contains(.,'Login')]"
     DELAY = 30
     LOAD_TRIES = 3
-    LOG_FILE_NAME = 'output.log'
 
-    def __init__(self):
-        self.logger = logging.getLogger('wg-gesucht')
-        self.display = Display(visible=0, size=(800, 600))
+    def __init__(self, debug=False):
+        self.logger = None
         self.browser = None
         self.username = None
         self.password = None
+        self.debug = debug
+
+        if self.debug:
+            self.display = Display(visible=0, size=(800, 600))
+            self.display.start()
 
     def execute(self):
         self.initialize()
@@ -35,32 +40,35 @@ class Upranking:
         self.shut_down()
 
     def initialize(self):
-        self.logger.info("Started Upranking program...")
-        self.display.start()
-        self.load_config_values()
         self.initialize_logger()
-
-    def load_config_values(self):
-        dir = os.path.dirname(__file__)
-        config_file_path = os.path.join(dir,"config.yml")
-        config = yaml.safe_load(open(config_file_path))
-
-        self.EDIT_URL = self.EDIT_URL.format(config['application_id'])
-        self.browser = webdriver.Chrome(config['path_to_driver'])
-        self.username = config['username']
-        self.password = config['password']
-        self.title1 = config['title1']
-        self.title2 = config['title2']
-
-        self.logger.info("Successfully loaded config values.")
+        self.initialize_chrome_driver()
+        self.load_config_values()
 
     def initialize_logger(self):
         formatter = logging.Formatter('%(asctime)s - %(message)s')
-        fh = logging.FileHandler(self.LOG_FILE_NAME)
-        fh.setLevel(logging.INFO)
-        fh.setFormatter(formatter)
+        sh = logging.StreamHandler()
+        sh.setFormatter(formatter)
+        self.logger = logging.getLogger('wg-gesucht')
         self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(fh)
+        self.logger.addHandler(sh)
+
+    def initialize_chrome_driver(self):
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-gpu')
+        if not self.debug:
+            chrome_options.add_argument('--headless')
+
+        self.browser = webdriver.Chrome(chrome_options=chrome_options)
+
+    def load_config_values(self):
+        self.EDIT_URL = self.EDIT_URL.format(os.environ['application_id'])
+        self.username = os.environ['username']
+        self.password = os.environ['password']
+        self.title1 = os.environ['title1']
+        self.title2 = os.environ['title2']
+
+        self.logger.info("Successfully loaded config values.")
 
     def wait_till_element_loaded(self, element_name, xpath_type, xpath_value):
 
@@ -115,8 +123,8 @@ class Upranking:
         self.logger.info("Logged in.")
 
     def update_title(self):
-        self.wait_till_element_loaded("Title input", By.ID, "title")
-        title_element = self.browser.find_element_by_id('title')
+        self.wait_till_element_loaded("Title input", By.ID, "ad_title")
+        title_element = self.browser.find_element_by_id('ad_title')
 
         current_title = title_element.get_attribute('value')
         title_element.clear()
@@ -130,20 +138,19 @@ class Upranking:
 
     def update_application(self):
         self.browser.get(self.EDIT_URL)
-        self.wait_till_element_loaded("First edit page", By.ID, "create_ad")
-
-        # leave first edit page untouched
-        self.browser.find_element_by_id('create_ad').submit()
-
         self.update_title()
-        self.browser.find_element_by_id('thisForm').submit()
+        self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        self.browser.find_element_by_id('update_request').click()
 
-        self.logger.info("Finished update!")
+        self.logger.info("Finished update.")
 
     def shut_down(self):
         self.browser.close()
-        self.display.stop()
+
+        if self.debug:
+            self.display.stop()
 
 if __name__ == '__main__':
-    upranking = Upranking()
+    upranking = Upranking() if os.environ.get('debug_wg_gesucht') != "true" else Upranking(debug=True)
     upranking.execute()
+

@@ -26,6 +26,9 @@ class Upranking:
         self.browser = None
         self.username = None
         self.password = None
+        self.application_id = None
+        self.title1 = None
+        self.title2 = None
         self.debug = debug
 
         if self.debug:
@@ -62,9 +65,9 @@ class Upranking:
         self.browser = webdriver.Chrome(chrome_options=chrome_options)
 
     def load_config_values(self):
-        self.EDIT_URL = self.EDIT_URL.format(os.environ['application_id'])
         self.username = os.environ['username']
         self.password = os.environ['password']
+        self.application_id = os.environ['application_id']
         self.title1 = os.environ['title1']
         self.title2 = os.environ['title2']
 
@@ -118,7 +121,7 @@ class Upranking:
 
         self.logger.info("Inserted all credentials and submitted login request.")
 
-        time.sleep(3)
+        self.wait_till_element_loaded("Login Icon", By.XPATH, "//div[contains(@class, 'profile_image_menu')]")
 
         self.logger.info("Logged in.")
 
@@ -137,7 +140,7 @@ class Upranking:
 
 
     def update_application(self):
-        self.browser.get(self.EDIT_URL)
+        self.browser.get(self.EDIT_URL.format(self.application_id))
         self.update_title()
         self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         self.browser.find_element_by_id('update_request').click()

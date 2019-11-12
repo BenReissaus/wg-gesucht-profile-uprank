@@ -6,14 +6,16 @@ RUN echo "http://dl-4.alpinelinux.org/alpine/v3.7/main" >> /etc/apk/repositories
 
 # install chromedriver
 RUN apk update
-RUN apk add chromium chromium-chromedriver vim
+RUN apk add chromium chromium-chromedriver
 
-# upgrade pip
+# install python dependencies
 RUN pip install --upgrade pip
-
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY upranking.py upranking.py
+COPY cron-job /etc/crontabs/root
+COPY run.sh /run.sh
+RUN chmod +x /run.sh
+COPY upranking.py /upranking.py
 
-CMD ["python", "upranking.py"]
+CMD ["./run.sh"]

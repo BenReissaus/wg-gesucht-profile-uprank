@@ -130,6 +130,7 @@ class Upranking:
         title_element = self.browser.find_element_by_id('ad_title')
 
         current_title = title_element.get_attribute('value')
+        self.logger.info("Current title is '{}'".format(current_title))
         title_element.clear()
         new_title = self.title1
         if current_title == self.title1:
@@ -143,9 +144,12 @@ class Upranking:
         self.browser.get(self.EDIT_URL.format(self.application_id))
         self.update_title()
         self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        self.browser.find_element_by_id('update_request').click()
+        self.wait_till_element_loaded("Update Button", By.ID, "update_view_request")
+        self.browser.find_element_by_id('update_view_request').click()
+        time.sleep(5)
 
         self.logger.info("Finished update.")
+
 
     def shut_down(self):
         self.browser.close()

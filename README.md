@@ -6,7 +6,7 @@ WG-Gesucht allows users to publish a profile about themselves in case they are l
 
 - Create wg-gesucht profile and get your application id.
 - Create `env-file` from `env-file.template` and adapt user values accordingly.
-- Adapt `cron-job` to appropriate update interval.
+- Create `cron-job` from `cron-job.template` and adapt cron job interval accordingly.
 - Execute `make run` which builds the docker image and runs the docker container.
 - Check docker logs with `docker logs -f wg-gesucht`.
 

@@ -1,4 +1,5 @@
 build:
+	docker stop wg-gesucht || true && docker rm wg-gesucht || true
 	docker build -t wg-gesucht .
 
 run: build
